@@ -1,6 +1,6 @@
 {
-      "name": "Fit AI Challenge Frontend",
-      "homepage": "https://github.com/Ducpham04/-Fit_Ai_Challenge_Wep-App_FE.git",
+      "name": "fit-ai-challenge-frontend",
+      "homepage": "https://ducpham04.github.io/-Fit_Ai_Challenge_Wep-App_FE",
       "version": "0.1.0",
       "private": true,
       "dependencies": {
@@ -30,6 +30,7 @@
             "@radix-ui/react-toggle": "^1.1.2",
             "@radix-ui/react-toggle-group": "^1.1.2",
             "@radix-ui/react-tooltip": "^1.1.8",
+            "@vitejs/plugin-react": "^5.1.0",
             "axios": "*",
             "class-variance-authority": "^0.7.1",
             "clsx": "*",
@@ -62,6 +63,6 @@
             "dev": "vite",
             "build": "vite build",
             "predeploy": "npm run build",
-  "deploy": "gh-pages -d build"
+            "deploy": "gh-pages -d build"
       }
 }
