@@ -1,18 +1,12 @@
-import { useState } from 'react'
+import { AuthProvider } from './src/context/AuthContext';
+import { AppRouter } from './src/router';
+import { Toaster } from './components/ui/sonner';
 
-import './App.css'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import Home from './components/pages/home/Home'
-function App() {
-  const [count, setCount] = useState(0)
-
+export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-      </Routes>
-    </BrowserRouter>
-  )
+    <AuthProvider>
+      <AppRouter />
+      <Toaster position="top-right" />
+    </AuthProvider>
+  );
 }
-
-export default App
