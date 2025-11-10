@@ -1,3 +1,4 @@
+import React, { lazy, Suspense, PropsWithChildren } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout } from '../layouts/MainLayout';
 import { Home } from '../pages/Home';
@@ -10,9 +11,19 @@ import { Profile } from '../pages/Profile';
 import { Login } from '../pages/Login';
 import { Register } from '../pages/Register';
 import { Settings } from '../pages/Settings';
+import { PushUpCounter } from '../pages/PushUpCounter';
 import { useAuth } from '../context/AuthContext';
 
+const Reports = lazy(() => import('../pages/Reports'));
+
+const Spinner = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
 // Protected Route Component
+
+
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -59,6 +70,16 @@ export const AppRouter = () => {
           <Route path="settings" element={
             <ProtectedRoute>
               <Settings />
+            </ProtectedRoute>
+          } />
+          <Route path="reports" element={
+                <ProtectedRoute>
+                  <Reports />
+                </ProtectedRoute>
+          } />
+          <Route path="counter/push-up" element={
+            <ProtectedRoute>
+              <PushUpCounter />
             </ProtectedRoute>
           } />
           <Route path="*" element={<Navigate to="/" replace />} />
