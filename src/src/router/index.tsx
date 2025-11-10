@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, PropsWithChildren } from 'react';
+import { lazy } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout } from '../layouts/MainLayout';
 import { Home } from '../pages/Home';
@@ -16,11 +16,6 @@ import { useAuth } from '../context/AuthContext';
 
 const Reports = lazy(() => import('../pages/Reports'));
 
-const Spinner = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
-  </div>
-);
 // Protected Route Component
 
 
