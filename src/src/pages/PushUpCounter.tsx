@@ -5,9 +5,6 @@ import {
   Clock,
   TrendingUp,
   Award,
-  PlayCircle,
-  StopCircle,
-  RotateCcw,
   Loader2,
   AlertCircle,
 } from 'lucide-react';
@@ -33,6 +30,7 @@ export const PushUpCounter = () => {
 
   const processingRef = useRef<number | null>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Handle video load
   const handleVideoLoad = useCallback((video: HTMLVideoElement) => {
@@ -48,14 +46,16 @@ export const PushUpCounter = () => {
   // Handle play state change
   const handlePlayStateChange = useCallback((isPlaying: boolean) => {
     setIsVideoPlaying(isPlaying);
-    if (!isPlaying && processingRef.current) {
+    if (isPlaying) {
+      startProcessing();
+    } else {
       stopProcessing();
     }
-  }, [stopProcessing]);
+  }, [startProcessing, stopProcessing]);
 
   // Processing loop
   useEffect(() => {
-    if (!isProcessing || !videoElement || !isVideoPlaying) {
+    if (!isProcessing || !videoElement || !isVideoPlaying || !canvasRef.current) {
       if (processingRef.current) {
         cancelAnimationFrame(processingRef.current);
         processingRef.current = null;
@@ -64,8 +64,8 @@ export const PushUpCounter = () => {
     }
 
     const processLoop = async () => {
-      if (videoElement && !videoElement.paused && !videoElement.ended) {
-        await processFrame(videoElement);
+      if (videoElement && !videoElement.paused && !videoElement.ended && canvasRef.current) {
+        await processFrame(videoElement, canvasRef.current);
       }
       processingRef.current = requestAnimationFrame(processLoop);
     };
@@ -80,36 +80,22 @@ export const PushUpCounter = () => {
     };
   }, [isProcessing, videoElement, isVideoPlaying, processFrame]);
 
-  // Handle start/stop
-  const handleToggleProcessing = useCallback(() => {
-    if (!videoElement) {
-      return;
-    }
-
-    if (isProcessing) {
-      stopProcessing();
-    } else {
+  useEffect(() => {
+    if (isModelReady && videoElement && isVideoPlaying && !isProcessing) {
       startProcessing();
     }
-  }, [videoElement, isProcessing, startProcessing, stopProcessing]);
-
-  // Handle reset
-  const handleReset = useCallback(() => {
-    resetCounter();
-    stopProcessing();
-  }, [resetCounter, stopProcessing]);
+    if ((!isVideoPlaying || !videoElement) && isProcessing) {
+      stopProcessing();
+    }
+  }, [isModelReady, videoElement, isVideoPlaying, isProcessing, startProcessing, stopProcessing]);
 
   // Get state display
   const getStateDisplay = () => {
     switch (metrics.state) {
-      case 'TOP':
+      case 'up':
         return { text: 'At Top', color: 'text-lime-600', bg: 'bg-lime-100' };
-      case 'DOWN':
+      case 'down':
         return { text: 'At Bottom', color: 'text-orange-600', bg: 'bg-orange-100' };
-      case 'TRANSITION_DOWN':
-        return { text: 'Going Down', color: 'text-sky-600', bg: 'bg-sky-100' };
-      case 'TRANSITION_UP':
-        return { text: 'Pushing Up', color: 'text-purple-600', bg: 'bg-purple-100' };
       default:
         return { text: 'Waiting...', color: 'text-gray-600', bg: 'bg-gray-100' };
     }
@@ -153,6 +139,13 @@ export const PushUpCounter = () => {
                   onPlayStateChange={handlePlayStateChange}
                   className="mb-4"
                 />
+                
+                {/* Canvas overlay for pose visualization */}
+                <canvas
+                  ref={canvasRef}
+                  className="absolute top-0 left-0 w-full h-full pointer-events-none"
+                  style={{ display: isProcessing && videoElement ? 'block' : 'none' }}
+                />
               </div>
 
               {/* Status Bar */}
@@ -190,6 +183,16 @@ export const PushUpCounter = () => {
                     </div>
                   )}
                 </div>
+
+                {/* Reset Button */}
+                <button
+                  onClick={resetCounter}
+                  disabled={metrics.reps === 0}
+                  className="px-4 py-2 text-sm font-medium text-white bg-orange-500 rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  title="Reset counter"
+                >
+                  Reset
+                </button>
 
                 {/* Error Display */}
                 {(error || videoError) && (
@@ -251,39 +254,7 @@ export const PushUpCounter = () => {
                 color="purple"
               />
 
-              {/* Control Buttons */}
-              <div className="pt-4 space-y-3">
-                <button
-                  onClick={handleToggleProcessing}
-                  disabled={!videoElement || !isModelReady || !isVideoPlaying}
-                  className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium transition-colors ${
-                    isProcessing
-                      ? 'bg-red-500 hover:bg-red-600 text-white'
-                      : 'bg-sky-500 hover:bg-sky-600 text-white disabled:bg-gray-300 disabled:cursor-not-allowed'
-                  }`}
-                >
-                  {isProcessing ? (
-                    <>
-                      <StopCircle className="w-5 h-5" />
-                      Stop Counting
-                    </>
-                  ) : (
-                    <>
-                      <PlayCircle className="w-5 h-5" />
-                      Start Counting
-                    </>
-                  )}
-                </button>
-
-                <button
-                  onClick={handleReset}
-                  disabled={!videoElement}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-                >
-                  <RotateCcw className="w-5 h-5" />
-                  Reset Counter
-                </button>
-              </div>
+              
             </motion.div>
           </div>
         </div>
@@ -313,9 +284,9 @@ export const PushUpCounter = () => {
                 2
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-1">Start Playing</h3>
+                <h3 className="font-semibold text-gray-900 mb-1">Press Play</h3>
                 <p className="text-sm text-gray-600">
-                  Play the video and click "Start Counting" to begin pose detection.
+                  When the video starts, the model runs automatically and begins counting.
                 </p>
               </div>
             </div>
@@ -326,7 +297,7 @@ export const PushUpCounter = () => {
               <div>
                 <h3 className="font-semibold text-gray-900 mb-1">Track Progress</h3>
                 <p className="text-sm text-gray-600">
-                  Watch as AI counts your reps in real-time and provides quality feedback.
+                  See reps, pace, time, and quality update in real-time while playing.
                 </p>
               </div>
             </div>
