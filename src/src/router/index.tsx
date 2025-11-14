@@ -51,6 +51,11 @@ export const AppRouter = () => {
           } />
           <Route path="challenges" element={<Challenges />} />
           <Route path="challenges/:id" element={<ChallengeDetail />} />
+          <Route path="challenges/:id/counter" element={
+            <ProtectedRoute>
+              <PushUpCounter />
+            </ProtectedRoute>
+          } />
           <Route path="leaderboard" element={<Leaderboard />} />
           <Route path="community" element={
             <ProtectedRoute>
@@ -71,11 +76,6 @@ export const AppRouter = () => {
                 <ProtectedRoute>
                   <Reports />
                 </ProtectedRoute>
-          } />
-          <Route path="counter/push-up" element={
-            <ProtectedRoute>
-              <PushUpCounter />
-            </ProtectedRoute>
           } />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
