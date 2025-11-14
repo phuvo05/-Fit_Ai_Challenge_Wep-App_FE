@@ -1,11 +1,12 @@
 import { motion } from 'motion/react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Calendar, Users, Trophy, Clock, Target, ArrowLeft, CheckCircle } from 'lucide-react';
 import { mockChallenges } from '../api/mockData';
 import { useState } from 'react';
 
 export const ChallengeDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [isJoined, setIsJoined] = useState(false);
   
   const challenge = mockChallenges.find((c) => c.id === Number(id));
@@ -25,10 +26,17 @@ export const ChallengeDetail = () => {
 
   const handleJoinChallenge = () => {
     setIsJoined(true);
-    // Simulate API call
-    setTimeout(() => {
-      alert('Successfully joined the challenge! 🎉');
-    }, 500);
+    // Redirect to the Push-Up Counter for challenge 1
+    if (id === '1') {
+      setTimeout(() => {
+        navigate(`/challenges/${id}/counter`);
+      }, 500);
+    } else {
+      // For other challenges, show alert
+      setTimeout(() => {
+        alert('Successfully joined the challenge! 🎉');
+      }, 500);
+    }
   };
 
   return (
